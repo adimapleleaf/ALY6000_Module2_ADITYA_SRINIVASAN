@@ -1,0 +1,325 @@
+
+##1.Print your name at the top of the script. 
+#Include the prefix: “Plotting Basics:” such that it  appears “Plotting Basics: Lastname” 
+print("Plotting Basics: SRINIVASAN")
+
+##2. Import libraries including: FSA, FSAdata, magrittr,  dplyr, plotrix, ggplot2, and moments 
+##NOTE:  You must use R version 3.6.3 to gain access to the FSA data set.  If you installed a 
+#later version of R, you must uninstall Rstudio and R. Then reinstall R version 3.6.3; then 
+#reinstall Rstudio. 
+
+#install.packages("FSA")
+#install.packages("FSAdata")
+#install.packages("magrittr")
+#install.packages("dplyr")
+#install.packages("plotrix")
+#install.packages("ggplot2")
+#install.packages("moments")
+library(FSA)
+library(FSAdata)
+library(magrittr)
+library(dplyr)
+library(plotrix)
+library(ggplot2)
+library(moments)
+
+
+#3. Load the BullTroutRML2 dataset (BullTroutRML2.csv) 
+#NOTE: The dataset is already imported into your project when you added the FSA and 
+#FSAdata libraries. 
+
+BullTroutRML2
+mydata <- BullTroutRML2
+
+
+##Descriptive Statistics and EDA 
+summary(mydata)
+sd(mydata$age)
+var(mydata$age)
+sd(mydata$fl)
+var(mydata$fl)
+skewness(mydata$age)
+kurtosis(mydata$age)
+skewness(mydata$fl)
+kurtosis(mydata$fl)
+boxplot(mydata$age, main="Boxplot of Age (yrs)")$out #(Shakya, S. et al., 2021)
+boxplot(mydata$fl, main="Boxplot of Fork Length (mm)")$out #(Shakya, S. et al., 2021)
+
+
+#Boxplot Distribution (Shakya, S. et al., 2021)
+boxplot(mydata$fl ~ mydata$age, data = mydata,
+        xlab= "Age (yrs)",
+        ylab= "Fork Length (mm)", 
+        main = "Boxplot Distribution")
+
+
+#Heat Map: R Scatter Plot (R Coder, n.d.).
+#install.packages("MASS")
+smoothScatter(mydata$fl, mydata$age, 
+              
+#The smoothScatter() function uses a kernel density estimate to produce smoothed color density representations of the scatterplot.
+#(Kabacoff, 2015, p.272). 
+              main="Heat Map: R scatter plot",
+              xlab= "Fork Length (mm)", 
+              ylab= "Age (yrs)",
+              transformation = function(x) x ^ 0.4,
+              colramp = colorRampPalette(c("#000099", "#00FEFF", "#45FE4F",
+                                           "#FCFF00", "#FF9400", "#FF3100")))
+library(MASS)
+kern <- kde2d(mydata$fl, mydata$age)
+
+contour(kern, drawlabels = FALSE, nlevels = 6,
+        col = rev(heat.colors(6)), add = TRUE, lwd = 3) #Adding Contours to the Heat Map 
+
+
+
+#Pairwise scatter plot (R Coder, n.d.).
+smoothScatter(mydata$fl, mydata$age, pch = 19,
+              main="Pairwise scatter plot", # ...title
+              xlab= "Fork Length (mm)", # ...x-axis
+              ylab= "Age (yrs)", # ...y-axis
+              transformation = function(x) x ^ 0.5, # Scale
+              colramp = colorRampPalette(c("#f7f7f7", "aquamarine"))) # Colors
+
+
+#Bar Plots: Number of Observations across Lakes
+#install.packages("tidyverse")
+library(tidyverse)
+ggplot(mydata) +
+  geom_bar(aes(x = lake), fill = '#003366', color = '#add8e6') + 
+  labs (
+    title = "Number of Observations across Lakes", # ...title
+    x = "Lakes",        # ...x-axis
+    y = "Observation Count",    # ...y-axis
+    )
+           
+
+#Bar Plots: Number of Observations across Era's 
+#install.packages("tidyverse")
+library(tidyverse)
+ggplot(mydata) +
+  geom_bar(aes(x = era), fill='navyblue') + 
+  labs (
+    title = "Number of Observations across Era's", # ...title
+    x = "Era",        # ...x-axis
+    y = "Observation Count",    # ...y-axis
+  )
+
+#Observation: The period 1997-01 shows more records of Bull Trout population.
+#This observation conforms with the information given in the dataset that restrictive sportfishing regulatory regimes
+#were implemented (in the 1990s) which led to changes in abundance and population structure of bull trout.
+
+
+
+#Distribution of Data across the two lakes and Era's
+op <- par(mfrow=c(2,2),pch=19)
+plot(fl~age,data=mydata,subset=lake=="Harrison" & era=="1977-80",main="Harrison, 1977-80",
+ylab= "Fork Length (mm)", # ...y-axis
+xlab= "Age (yrs)", # ...x-axis
+col= "navyblue")
+plot(fl~age,data=mydata,subset=lake=="Harrison" & era=="1997-01",main="Harrison, 1997-2001",
+     ylab= "Fork Length (mm)", # ...y-axis
+     xlab= "Age (yrs)", # ...x-axis
+     col= "navyblue")
+plot(fl~age,data=mydata,subset=lake=="Osprey" & era=="1977-80",main="Osprey, 1977-80",
+     ylab= "Fork Length (mm)", # ...y-axis
+     xlab= "Age (yrs)", # ...x-axis
+     col= "navyblue")
+plot(fl~age,data=mydata,subset=lake=="Osprey" & era=="1997-01",main="Osprey, 1997-2001",
+     ylab= "Fork Length (mm)", # ...y-axis
+     xlab= "Age (yrs)", # ...x-axis
+     col= "navyblue")
+par(op)
+
+
+
+#4. Print the first and last 3 records from the BullTroutRMS2 dataset 
+headtail(mydata,n=3) 
+ 
+
+#5. Remove all records except those from Harrison Lake (hint: use the <filterD() function) 
+#NOTE: From this point forward any reference to BullTroutRML2 always refers to the 
+#filtered dataset (Harrison Lake only data is used). You may choose to rename the 
+#dataset at this point. 
+
+filtered_data<- filterD(mydata, lake=='Harrison')
+filtered_data
+
+#We have renamed the dataset now to "filtered_data". Now, "filtered_data" only has records from Harrison Lake.
+
+#6. Display the first and last 5 records from the filtered BullTroutRML2 dataset 
+headtail(filtered_data, n=5)
+
+
+#7. Display the structure of the filtered BullTroutRML2dataset 
+str(filtered_data)
+
+
+#8. Display the summary of the filtered BullTroutRML2dataset 
+summary(filtered_data)
+
+
+#9. Create a scatterplot for “age” (y variable) and “fl” (x variable) with the following specifications:
+#Limit of x axis is (0,500) 
+#Limit of y axis is (0,15) 
+#Title of graph is “Plot 1: Harrison Lake Trout" 
+#Y axis label is “Age (yrs)” 
+#X axis label is “Fork Length (mm)” 
+#Use a small filled circle for the plotted data points
+
+
+plot(x=filtered_data$fl, y=filtered_data$age, 
+xlab= "Fork Length (mm)", # ...x-axis
+ylab= "Age (yrs)", # ...y-axis
+xlim=c(0,500), 
+ylim=c(0,15),
+main= "Plot 1: Harrison Lake Trout", pch=16, cex=0.5)
+
+#Here, we use 'pch = 16', which corresponds to a filled circle
+# 'cex' specifies the symbol size. 
+# 'cex' is a number indicating the amount by which plotting symbols should be scaled relative to the default. 
+# 1=default, 1.5 is 50% larger, 0.5 is 50% smaller, and so forth.
+
+
+#10. Plot an “Age” histogram with the following specifications 
+#Y axis label is “Frequency” 
+#X axis label is “Age (yrs)” 
+#Title of the histogram is “Plot 2: Harrison Fish Age Distribution” 
+#X and Y axis limits is 0, 15 
+#The color of the frequency plots is “cadetblue” 
+#The color of the Title is “cadetblue” 
+
+
+hist(filtered_data$age,
+main= "Plot 2: Harrison Fish Age Distribution",
+xlab = "Age (yrs)", # ...x-axis
+ylab =  "Frequency", # ...y-axis
+col= "cadetblue",
+col.main="cadetblue", ##specifying color of the title 
+xlim=c(0, 15), 
+ylim=c(0,15)
+          )
+
+
+
+#11. Create an overdense plot using the same specifications as the previous scatterplot. But,  
+#Title the plot “Plot 3: Harrison Density Shaded by Era” 
+#Y axis label is “Age (yrs)” 
+#Y axis limits are 0 to 15 
+#X axis label is “Fork Length (mm)” 
+#X axis limits are 0 to 500  
+#include two levels of shading for the “green” data points.  
+#Plot solid circles as data points 
+
+
+dense_plot =
+  ggplot(data = filtered_data, aes(x = fl, y = age, size = age))+
+  geom_point(color = 'Darkgreen', pch=19, alpha=0.5)+
+  #The alpha attribute lowers the density of points in a scatter plot so that when 2 points overlap, 
+  #the density of the overlapping portion will increase and it will be represented by a darker shade 
+  #pch=19 is set as this corresponds to a 'solid circle'
+  
+  theme_bw()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())+
+  labs(title="Plot 3: Harrison Density Shaded by Era",
+       x="Fork Length (mm)", y = "Age (yrs)")+
+  xlab("Fork Length (mm)")+ylab("Age (yrs)")+
+xlim(0,500) + ylim(0,15)
+print(dense_plot)
+
+
+#12. Create a new object called “tmp” that includes the first 3 and last 3 records of the 
+#BullTroutRML2 data set. 
+
+tmp <-headtail(filtered_data, n=3)
+tmp
+
+#13. Display the “era” column (variable) in the new “tmp” object 
+tmp[, c("era"), drop=FALSE]
+
+
+##Alternatively, we can also use the below code: print(tmp$era)
+
+
+#14. Create a pchs vector with the argument values for + and x.  
+
+pchs <- c("+", "x")
+pchs
+
+#15. Create a cols vector with the two elements “red” and “gray60” 
+cols <- c("red", "gray60")
+cols
+
+#16. Convert the tmp era values to numeric values.  
+tmp_era <- as.numeric(tmp[, c("era")])
+tmp_era
+class(tmp_era)
+
+#17. Initialize the cols vector with the tmp era values 
+
+cols[tmp$era]
+cols
+
+#18. Create a plot of “Age (yrs)” (y variable) versus “Fork Length (mm)” (x variable) with the 
+#following specifications: 
+#Title of graph is “Plot 4: Symbol & Color by Era” 
+#Limit of x axis is (0,500) 
+#Limit of y axis is (0,15) 
+#X axis label is “Age (yrs)” 
+#Y axis label is “Fork Length (mm)” 
+#Set pch equal to pchs era values 
+#Set col equal to cols era values 
+
+
+plot(x=filtered_data$fl, y=filtered_data$age, xlim=c(0,500), ylim=c(0,15),
+     pch= ifelse(filtered_data$era=="1977-80", pchs[1], pchs[2]),
+col=ifelse(filtered_data$era=="1977-80", cols[1], cols[2]), 
+ylab = "Age (yrs)", xlab= "Fork Length (mm)",
+main= "Plot 4: Symbol & Color by Era")     
+     
+#NOTE: In the question, we have been asked to set X axis label as “Age (yrs)”, and Y axis label as “Fork Length (mm)”. 
+#However, as per the given dataset, the range of values set for Age is 0-14 years, while for Fork Length, the range is from 20mm to 688mm. 
+#Thus, we will interchange the labels on the axis. 
+
+#19. Plot a regression line overlay on Plot 4 and title the new graph “Plot 5: Regression Overlay”. 
+
+plot(x=filtered_data$fl, y=filtered_data$age, xlim=c(0,500), ylim=c(0,15),
+     pch= ifelse(filtered_data$era=="1977-80", pchs[1], pchs[2]),
+     col=ifelse(filtered_data$era=="1977-80", cols[1], cols[2]), 
+     ylab = "Age (yrs)", xlab= "Fork Length (mm)",
+     main= "Plot 5: Regression Overlay")
+abline(lm(filtered_data$age~filtered_data$fl), col="cadetblue")
+
+#The abline() function is used to add a linear line of best fit (Kabacoff, 2015, p.265).
+
+#NOTE: In the question, we have been asked to set X axis label as “Age (yrs)”, and Y axis label as “Fork Length (mm)”. 
+#However, as per the given dataset, the range of values set for Age is 0-14 years, while for Fork Length, the range is from 20mm to 688mm. 
+#Thus, we will interchange the labels on the axis. 
+
+
+
+
+#20. Place a legend of on Plot 5 and call the new graph “Plot 6: :Legend Overlay” 
+
+plot(x=filtered_data$fl, y=filtered_data$age, xlim=c(0,500), ylim=c(0,15),
+     pch= ifelse(filtered_data$era=="1977-80", pchs[1], pchs[2]),
+     col=ifelse(filtered_data$era=="1977-80", cols[1], cols[2]), 
+     ylab = "Age (yrs)", xlab= "Fork Length (mm)",
+     main= "Plot 6: :Legend Overlay")
+abline(lm(filtered_data$age~filtered_data$fl), col="cadetblue")
+#Used to add a linear line of best fit (Kabacoff, 2015, p.265).
+legend("topleft", c("Years:1977-80", "Years:1997-01"), pch=c("+", "x"), col=c("red", "grey"))
+
+#NOTE: In the question, we have been asked to set X axis label as “Age (yrs)”, and Y axis label as “Fork Length (mm)”. 
+#However, as per the given dataset, the range of values set for Age is 0-14 years, while for Fork Length, the range is from 20mm to 688mm. 
+#Thus, we will interchange the labels on the axis. 
+
+
+#21. Commit your code in your github/gitlab repo 
+
+
+
+
+
+
